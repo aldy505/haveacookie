@@ -154,7 +154,9 @@ export function buildProfileEmbed(
   const rankDisplay = stats.currentRank
     ? `${stats.currentRank.emoji} **${stats.currentRank.name}**`
     : "Unranked";
-  const taglineDisplay = stats.currentRank ? stats.currentRank.tagline : "Give and receive cookies to earn your first rank.";
+  const taglineDisplay = stats.currentRank
+    ? stats.currentRank.tagline
+    : "Give and receive cookies to earn your first rank.";
   const nextRankName = stats.progress.nextRank ? stats.progress.nextRank.name : "Max rank reached";
   const rankColor = stats.currentRank?.color ?? 0x00008b;
 

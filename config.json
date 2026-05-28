@@ -1,27 +1,27 @@
 {
-    "token": "<bot token>",
-    "clientId": "<discord application client id>",
-    "guildId": "<optional guild id for fast slash command updates>",
-    
-    "prefix": "!",
-    "emoji": "🍪",
-    "maxPerDay": 5,
+  "token": "<bot token>",
+  "clientId": "<discord application client id>",
+  "guildId": "<optional guild id for fast slash command updates>",
 
-    "databaseUrl" : "<postgres connection url>",
+  "prefix": "!",
+  "emoji": "🍪",
+  "maxPerDay": 5,
 
-    "prizePurchaseAlertChannel": "CHANNEL ID",
-    "prizes": [
-        { 
-            "name": "Day Off", 
-            "description": "Take a day off to have some fun and recharge your batteries.", 
-            "price": 25,
-            "redeemInstructions": "Admin has been notified to process your purchase."
-        },
-        { 
-            "name": "Team Party", 
-            "description": "End the day early with a team party.", 
-            "price": 10,
-            "redeemInstructions": "Admin has been notified to process your purchase."
-        }
-    ]
+  "databaseUrl": "<postgres connection url>",
+
+  "prizePurchaseAlertChannel": "CHANNEL ID",
+  "prizes": [
+    {
+      "name": "Day Off",
+      "description": "Take a day off to have some fun and recharge your batteries.",
+      "price": 25,
+      "redeemInstructions": "Admin has been notified to process your purchase."
+    },
+    {
+      "name": "Team Party",
+      "description": "End the day early with a team party.",
+      "price": 10,
+      "redeemInstructions": "Admin has been notified to process your purchase."
+    }
+  ]
 }

@@ -1,6 +1,11 @@
 import { DataTypes, Op, QueryTypes, Sequelize } from "sequelize";
 import { config } from "./config";
-import { getRankProgress, resolveRankFromTotals, type RankConfig, type RankProgress } from "./ranks";
+import {
+  getRankProgress,
+  resolveRankFromTotals,
+  type RankConfig,
+  type RankProgress,
+} from "./ranks";
 
 const sequelize = new Sequelize(config.databaseUrl);
 

@@ -163,7 +163,10 @@ export function getRankById(rankId: number | null): RankConfig | null {
   return RANKS.find((rank) => rank.id === rankId) ?? null;
 }
 
-export function resolveRankFromTotals(cookiesGiven: number, cookiesReceived: number): RankConfig | null {
+export function resolveRankFromTotals(
+  cookiesGiven: number,
+  cookiesReceived: number,
+): RankConfig | null {
   let currentRank: RankConfig | null = null;
 
   for (const rank of RANKS) {
@@ -185,7 +188,7 @@ function toRatio(current: number, required: number): number {
 
 export function getRankProgress(cookiesGiven: number, cookiesReceived: number): RankProgress {
   const currentRank = resolveRankFromTotals(cookiesGiven, cookiesReceived);
-  const nextRank = currentRank ? RANKS[currentRank.id] ?? null : RANKS[0] ?? null;
+  const nextRank = currentRank ? (RANKS[currentRank.id] ?? null) : (RANKS[0] ?? null);
 
   if (!nextRank) {
     return {

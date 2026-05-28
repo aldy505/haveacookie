@@ -14,6 +14,7 @@ The Discord bot that fosters better communities through rewards and peer recogni
 <br>
 
 Have a Cookie is a simple alternative to HeyTaco!, Karma Bot, and Karl (KudosBot) that is:
+
 - Free
 - Open-source
 - Self-hosted
@@ -22,23 +23,24 @@ Have a Cookie is a simple alternative to HeyTaco!, Karma Bot, and Karl (KudosBot
 
 To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#getting-started-railwayapp), @ mention another member along with the emoji to give them points, and exchange your points for custom prizes!
 
-
-
-
 # (PROMO VIDEO)
 
 # Features
+
 ### Give kudos to your community-members
+
 - ⚡ Celebrate your server members and teammates by giving them props & kudos in the form of limited :cookie: emoji currency.
 - ⚡ Keep your members engaged by encouraging helpful contributions and peer-to-peer support.
 - ⚡ Foster a happier server where members show their appreciation and praise to each other in a fun way.
 - ⚡ Use the leaderboards to build some friendly competition.
 
 ### Redeem points for prizes
+
 - ⚡ Create a custom catalogue of prizes which can be purchased with the :cookie: currency.
 - ⚡ Members can browse through the list of prizes and makes purchases by messaging the bot.
 
 ### Customize everything!
+
 - ⚡ Don't like the "cookie" 🍪 points? Give your team members a 🥭, 🥝, 👍, 🍔, 🙌, etc. instead. The choice of emoji is yours!
 - ⚡ Create your own rewards: give them a name, set the "price", provide instructions, and more!
 - ⚡ Set your own limit for the amount of tacos your server members can give per day.
@@ -47,10 +49,13 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 # Screenshots
 
 # Getting Started ([Railway.app](https://railway.app?referralCode=7ENqQl))
+
 ## Video Tutorial
 
 ## Written Instructions ([Railway.app](https://railway.app?referralCode=7ENqQl))
+
 ### Creating your Discord Bot ([based on discordpy docs](https://discordpy.readthedocs.io/en/latest/discord.html))
+
 1. Make sure you’re logged on to the [Discord website](https://discord.com/).
 2. Navigate to the [application page](https://discord.com/developers/applications).
 3. Click on the blue "New application" button at the top-right.
@@ -66,12 +71,14 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 13. Add the bot to the respective server.
 
 ### Creating your Code Repository
+
 1. Create a private clone of [this repository](https://github.com/havecookie/haveacookie) on GitHub. Make sure this repo is set to private, as you will be adding sensitive information in the later steps.
 2. In your repo, select the `data` folder, and click on [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json)
 3. Edit the variables for your custom bot. You can customize the emoji, prefix, max per day, prizes, and prize channel. Note that for the prizes, the `"redeemInstructions"` text is only visible once the prize has been successfully purchased.
 4. IMPORTANT: Make sure to add the bot token (from the previous section), and database URL (next section)
 
 ### Hosting your bot
+
 1. If you don't have one already, [create a Railway.app account](https://railway.app?referralCode=7ENqQl)
 2. Create a new Project, and select "Deploy from GitHub repo".
 3. In the same "New Project" window, also select "Provision PostgreSQL".
@@ -81,26 +88,31 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 7. On the right window, click on the "Connect" tab, and copy the "Postgres Connection URL".
 
 ### Updating code with Database URL
-1. In your GitHub repository, return to [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) and paste the Postgres Connection URL as the value for `"databaseUrl" :`. For example: 
+
+1. In your GitHub repository, return to [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) and paste the Postgres Connection URL as the value for `"databaseUrl" :`. For example:
 2. Saving these changes will trigger the deployment of an updated Railway project.
 3. Your bot should now be live and working.
 
 ### Registering slash commands
+
 1. Add your Discord app `clientId` in `config.json`.
 2. Optionally add `guildId` for faster, guild-scoped command updates while testing.
 3. Run `npm run register-commands` after changing slash commands.
 
 ### Running the bot (TypeScript build)
+
 1. Install dependencies: `npm install`
 2. Build: `npm run build`
 3. Start: `npm start`
 
 ### Lint and format checks
+
 1. Check formatting: `npm run format:check`
 2. Run lint: `npm run lint`
 3. Fix formatting: `npm run format`
 
 ### Docker image
+
 - Runtime base image: `gcr.io/distroless/nodejs24-debian13`
 - Published image: `ghcr.io/aldy505/haveacookie`
 - Tags:
@@ -109,25 +121,30 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
   - `latest`: published only for `release/published`
 
 ### Docker Compose
+
 1. Ensure your local `config.json` uses `postgres` as the database host (for example: `postgres://haveacookie:haveacookie@postgres:5432/haveacookie`).
 2. Start services: `docker compose up -d`
 3. Stop services: `docker compose down`
 
 ### Testing the Bot
+
 1. Give a reward: In any channel where the bot is present, `@` mention a fellow user followed by the emoji. For example, `"thanks for the help @candidexmedia :cookie:"`
 2. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
-2. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
-3. Leaderboard + Check Balance: use `/leaderboard` in your server.
-4. Profile + Rank Progression: use `/profile` to view current rank, tagline, total given/received, daily give usage, and progress to the next rank.
+3. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
+4. Leaderboard + Check Balance: use `/leaderboard` in your server.
+5. Profile + Rank Progression: use `/profile` to view current rank, tagline, total given/received, daily give usage, and progress to the next rank.
 
 # About the project
+
 I commissioned this bot from a freelancer on Fiverr named [mdaniels6758](www.fiverr.com/mdaniels6758). I made some modifications and decided to open source the project in the hopes that it will benefit other Discord users, and that improvements can be brought to the project collectively.
 
 # Wishlist / Bugs to Fix
+
 Help, Suggestions, and Pull Requests are much appreciated!
 Consult the list of bugs and feature requests here: https://github.com/havecookie/haveacookie/issues
 
 # Support
+
 Do you enjoy this software? If so, consider supporting me so that I can bring more open source ideas and tutorials to life! <br><br>
 https://ko-fi.com/candidexmedia <br><br>
 <a href='https://ko-fi.com/O4O61QG9T' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi5.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
