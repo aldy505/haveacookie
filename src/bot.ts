@@ -3,16 +3,30 @@ import { formatInTimeZone } from "date-fns-tz";
 import { ChannelType, Client, Events, GatewayIntentBits, Partials, type Message } from "discord.js";
 import { config } from "./config";
 import { mentionsFirstUserId } from "./helper";
-import { CUserCookie, getBalance, queryLeaderboards } from "./model";
+import {
+  backfillUserStatsFromTransactions,
+  CUserCookie,
+  getBalance,
+  getTodayGivenCount,
+  getUserRankState,
+  incrementUserCookiesGiven,
+  incrementUserCookiesReceived,
+  queryLeaderboards,
+  recalculateUserRank,
+  syncModels,
+} from "./model";
 import {
   buildCookieCooldownEmbed,
   buildInsufficientCookieEmbed,
   buildInvalidItemEmbed,
   buildLeaderboardEmbed,
+  buildProfileEmbed,
   buildPurchaseAlertEmbed,
   buildPurchaseEmbed,
+  buildRankUpEmbed,
   buildShopEmbed,
 } from "./embeds";
+import { getRankById } from "./ranks";
 
 const logger = pino({
   transport: {
@@ -47,6 +61,16 @@ bot.on(Events.InteractionCreate, async (interaction) => {
     const embed = buildLeaderboardEmbed(interaction.user, config.emoji, boardData);
 
     await interaction.reply({ embeds: [embed] });
+    return;
+  }
+
+  if (interaction.commandName === "profile") {
+    const targetUser = interaction.options.getUser("user") ?? interaction.user;
+    const todayOnTz = formatInTimeZone(new Date(), resetTz, "yyyy-MM-dd");
+    const rankState = await getUserRankState(targetUser.id, todayOnTz);
+    const embed = buildProfileEmbed(interaction.user, targetUser, config.emoji, rankState);
+
+    await interaction.reply({ embeds: [embed] });
   }
 });
 
@@ -70,21 +94,16 @@ bot.on(Events.MessageCreate, async (msg: Message) => {
   ) {
     const todayOnTz = formatInTimeZone(new Date(), resetTz, "yyyy-MM-dd");
 
-    const data = await CUserCookie.findAll({
-      where: {
-        given_by: msg.author.id,
-        given_date: todayOnTz,
-      },
-    });
+    const givenTodayCount = await getTodayGivenCount(msg.author.id, todayOnTz);
 
-    if (data.length >= config.maxPerDay) {
+    if (givenTodayCount >= config.maxPerDay) {
       const embed = buildCookieCooldownEmbed(msg.author, config.emoji, config.maxPerDay);
 
       await msg.reply({ embeds: [embed] });
       return;
     }
 
-    if (data.length + msg.mentions.users.size > config.maxPerDay) {
+    if (givenTodayCount + msg.mentions.users.size > config.maxPerDay) {
       const embed = buildCookieCooldownEmbed(
         msg.author,
         config.emoji,
@@ -105,6 +124,36 @@ bot.on(Events.MessageCreate, async (msg: Message) => {
         is_transaction: false,
       })),
     );
+
+    await incrementUserCookiesGiven(msg.author.id, msg.mentions.users.size);
+
+    for (const user of msg.mentions.users.values()) {
+      await incrementUserCookiesReceived(user.id, 1);
+    }
+
+    const giverRankUpdate = await recalculateUserRank(msg.author.id);
+    if (
+      giverRankUpdate.currentRankId !== null &&
+      (giverRankUpdate.previousRankId ?? 0) < giverRankUpdate.currentRankId
+    ) {
+      const newRank = getRankById(giverRankUpdate.currentRankId);
+      if (newRank) {
+        await msg.reply({ embeds: [buildRankUpEmbed(msg.author, newRank)] });
+      }
+    }
+
+    for (const user of msg.mentions.users.values()) {
+      const receiverRankUpdate = await recalculateUserRank(user.id);
+      if (
+        receiverRankUpdate.currentRankId !== null &&
+        (receiverRankUpdate.previousRankId ?? 0) < receiverRankUpdate.currentRankId
+      ) {
+        const newRank = getRankById(receiverRankUpdate.currentRankId);
+        if (newRank) {
+          await msg.reply({ embeds: [buildRankUpEmbed(user, newRank)] });
+        }
+      }
+    }
 
     await msg.react(config.emoji);
     return;
@@ -184,7 +233,8 @@ bot.on(Events.MessageCreate, async (msg: Message) => {
 });
 
 async function start(): Promise<void> {
-  await CUserCookie.sync();
+  await syncModels();
+  await backfillUserStatsFromTransactions();
   await bot.login(config.token);
 }
 

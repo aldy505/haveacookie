@@ -6,6 +6,13 @@ const commands = [
     .setName("leaderboard")
     .setDescription("Show the cookie leaderboard.")
     .toJSON(),
+  new SlashCommandBuilder()
+    .setName("profile")
+    .setDescription("Show your cookie rank and progression profile.")
+    .addUserOption((option) =>
+      option.setName("user").setDescription("User to view").setRequired(false),
+    )
+    .toJSON(),
 ];
 
 async function registerCommands(): Promise<void> {

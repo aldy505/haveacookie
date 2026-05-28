@@ -1,5 +1,6 @@
 import { EmbedBuilder, type User } from "discord.js";
 import type { Prize } from "./config";
+import type { RankConfig, RankProgress } from "./ranks";
 
 const noResultsMsg = "No results to display";
 
@@ -126,5 +127,69 @@ export function buildPurchaseAlertEmbed(author: User, item: Prize, emoji: string
       { value: `${item.price}${emoji}`, inline: true, name: "Price" },
     ],
     footer: { text: author.tag, icon_url: author.displayAvatarURL() },
+  });
+}
+
+function buildProgressBar(ratio: number, size = 10): string {
+  const clamped = Math.max(0, Math.min(ratio, 1));
+  const filled = Math.round(clamped * size);
+  const empty = Math.max(size - filled, 0);
+
+  return `${"█".repeat(filled)}${"░".repeat(empty)}`;
+}
+
+export function buildProfileEmbed(
+  requester: User,
+  target: User,
+  emoji: string,
+  stats: {
+    cookiesGiven: number;
+    cookiesReceived: number;
+    gaveToday: number;
+    remainingToday: number;
+    currentRank: RankConfig | null;
+    progress: RankProgress;
+  },
+): EmbedBuilder {
+  const rankDisplay = stats.currentRank
+    ? `${stats.currentRank.emoji} **${stats.currentRank.name}**`
+    : "Unranked";
+  const taglineDisplay = stats.currentRank ? stats.currentRank.tagline : "Give and receive cookies to earn your first rank.";
+  const nextRankName = stats.progress.nextRank ? stats.progress.nextRank.name : "Max rank reached";
+  const rankColor = stats.currentRank?.color ?? 0x00008b;
+
+  return new EmbedBuilder({
+    color: rankColor,
+    title: `${target.username}'s Cookie Profile`,
+    author: {
+      name: requester.tag,
+      icon_url: requester.displayAvatarURL(),
+    },
+    footer: { text: `Current rank: ${rankDisplay}` },
+  }).addFields([
+    { name: "Tagline", value: taglineDisplay },
+    {
+      name: "Totals",
+      value: `Gave: **${stats.cookiesGiven} ${emoji}**\nReceived: **${stats.cookiesReceived} ${emoji}**`,
+      inline: true,
+    },
+    {
+      name: "Today",
+      value: `Gave today: **${stats.gaveToday}/${stats.gaveToday + stats.remainingToday} ${emoji}**\nRemaining today: **${stats.remainingToday} ${emoji}**`,
+      inline: true,
+    },
+    {
+      name: `Progress to ${nextRankName}`,
+      value: `Given: ${stats.progress.gaveProgressText} ${buildProgressBar(stats.progress.gaveProgressRatio)}\nReceived: ${stats.progress.receivedProgressText} ${buildProgressBar(stats.progress.receivedProgressRatio)}`,
+    },
+  ]);
+}
+
+export function buildRankUpEmbed(user: User, rank: RankConfig): EmbedBuilder {
+  return new EmbedBuilder({
+    color: rank.color,
+    title: "Rank Up!",
+    description: `${user} reached **${rank.name}** ${rank.emoji}`,
+    fields: [{ name: "Tagline", value: rank.tagline }],
   });
 }

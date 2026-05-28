@@ -1,5 +1,6 @@
-import { DataTypes, QueryTypes, Sequelize } from "sequelize";
+import { DataTypes, Op, QueryTypes, Sequelize } from "sequelize";
 import { config } from "./config";
+import { getRankProgress, resolveRankFromTotals, type RankConfig, type RankProgress } from "./ranks";
 
 const sequelize = new Sequelize(config.databaseUrl);
 
@@ -41,6 +42,38 @@ export const CUserCookie = sequelize.define(
   },
 );
 
+export const CUserStats = sequelize.define(
+  "CUserStats",
+  {
+    user_id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    cookies_given: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    cookies_received: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    current_rank: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+  },
+  {
+    tableName: "c_user_stats",
+    indexes: [
+      {
+        fields: ["current_rank"],
+      },
+    ],
+  },
+);
+
 type LeaderboardRow = {
   id: string;
   given_count?: string | number | null;
@@ -51,6 +84,160 @@ type SelfStatRow = {
   given_count: string | number | null;
   received_count: string | number | null;
 };
+
+type CountRow = { count: string | number | null };
+
+export type UserRankState = {
+  userId: string;
+  cookiesGiven: number;
+  cookiesReceived: number;
+  currentRank: RankConfig | null;
+  progress: RankProgress;
+  gaveToday: number;
+  remainingToday: number;
+};
+
+function normalizeCount(value: string | number | null | undefined): number {
+  return Number(value ?? 0);
+}
+
+async function getCookieCountsFromTransactions(userId: string): Promise<{
+  givenCount: number;
+  receivedCount: number;
+}> {
+  const givenRows = await sequelize.query<CountRow>(
+    "select count(*) as count from c_user_cookie_transactions where given_by = :userId and is_transaction = false",
+    {
+      type: QueryTypes.SELECT,
+      replacements: { userId },
+    },
+  );
+  const receivedRows = await sequelize.query<CountRow>(
+    "select count(*) as count from c_user_cookie_transactions where given_to = :userId and is_given = true",
+    {
+      type: QueryTypes.SELECT,
+      replacements: { userId },
+    },
+  );
+
+  return {
+    givenCount: normalizeCount(givenRows[0]?.count),
+    receivedCount: normalizeCount(receivedRows[0]?.count),
+  };
+}
+
+async function ensureUserStatsRecord(userId: string): Promise<{
+  user_id: string;
+  cookies_given: number;
+  cookies_received: number;
+  current_rank: number | null;
+}> {
+  const existing = await CUserStats.findByPk(userId);
+  if (existing) {
+    const raw = existing.get();
+    return {
+      user_id: String(raw.user_id),
+      cookies_given: Number(raw.cookies_given ?? 0),
+      cookies_received: Number(raw.cookies_received ?? 0),
+      current_rank: raw.current_rank === null ? null : Number(raw.current_rank),
+    };
+  }
+
+  const counts = await getCookieCountsFromTransactions(userId);
+  const rank = resolveRankFromTotals(counts.givenCount, counts.receivedCount);
+  const created = await CUserStats.create({
+    user_id: userId,
+    cookies_given: counts.givenCount,
+    cookies_received: counts.receivedCount,
+    current_rank: rank?.id ?? null,
+  });
+  const raw = created.get();
+
+  return {
+    user_id: String(raw.user_id),
+    cookies_given: Number(raw.cookies_given ?? 0),
+    cookies_received: Number(raw.cookies_received ?? 0),
+    current_rank: raw.current_rank === null ? null : Number(raw.current_rank),
+  };
+}
+
+export async function calculateUserRank(userId: string): Promise<RankConfig | null> {
+  const stats = await ensureUserStatsRecord(userId);
+  return resolveRankFromTotals(stats.cookies_given, stats.cookies_received);
+}
+
+export async function recalculateUserRank(userId: string): Promise<{
+  previousRankId: number | null;
+  currentRankId: number | null;
+}> {
+  const stats = await ensureUserStatsRecord(userId);
+  const currentRank = resolveRankFromTotals(stats.cookies_given, stats.cookies_received);
+  const currentRankId = currentRank?.id ?? null;
+
+  if (stats.current_rank !== currentRankId) {
+    await CUserStats.update(
+      { current_rank: currentRankId },
+      {
+        where: {
+          user_id: userId,
+        },
+      },
+    );
+  }
+
+  return {
+    previousRankId: stats.current_rank,
+    currentRankId,
+  };
+}
+
+export async function incrementUserCookiesGiven(userId: string, amount = 1): Promise<void> {
+  await ensureUserStatsRecord(userId);
+  await CUserStats.increment("cookies_given", {
+    by: amount,
+    where: {
+      user_id: userId,
+    },
+  });
+}
+
+export async function incrementUserCookiesReceived(userId: string, amount = 1): Promise<void> {
+  await ensureUserStatsRecord(userId);
+  await CUserStats.increment("cookies_received", {
+    by: amount,
+    where: {
+      user_id: userId,
+    },
+  });
+}
+
+export async function getTodayGivenCount(userId: string, givenDate: string): Promise<number> {
+  return CUserCookie.count({
+    where: {
+      given_by: userId,
+      given_date: givenDate,
+    },
+  });
+}
+
+export async function getUserRankState(userId: string, givenDate: string): Promise<UserRankState> {
+  const stats = await ensureUserStatsRecord(userId);
+  await recalculateUserRank(userId);
+  const gaveToday = await getTodayGivenCount(userId, givenDate);
+  const remainingToday = Math.max(config.maxPerDay - gaveToday, 0);
+  const currentRank = resolveRankFromTotals(stats.cookies_given, stats.cookies_received);
+  const progress = getRankProgress(stats.cookies_given, stats.cookies_received);
+
+  return {
+    userId,
+    cookiesGiven: stats.cookies_given,
+    cookiesReceived: stats.cookies_received,
+    currentRank,
+    progress,
+    gaveToday,
+    remainingToday,
+  };
+}
 
 export async function getBalance(selfUserId: string): Promise<number> {
   const balanceRows = await sequelize.query<{ res: string | number | null }>(
@@ -119,4 +306,43 @@ export async function queryLeaderboards(
       received_count: Number(selfStat.received_count ?? 0),
     },
   };
+}
+
+export async function syncModels(): Promise<void> {
+  await CUserCookie.sync();
+  await CUserStats.sync();
+}
+
+export async function backfillUserStatsFromTransactions(): Promise<void> {
+  const participantRows = await sequelize.query<{ user_id: string }>(
+    `select distinct user_id from (
+      select given_by as user_id from c_user_cookie_transactions where given_by is not null
+      union
+      select given_to as user_id from c_user_cookie_transactions where given_to is not null
+    ) as participants`,
+    {
+      type: QueryTypes.SELECT,
+    },
+  );
+
+  if (participantRows.length === 0) {
+    return;
+  }
+
+  const userIds = participantRows.map((row) => row.user_id);
+  const existingRows = await CUserStats.findAll({
+    attributes: ["user_id"],
+    where: {
+      user_id: {
+        [Op.in]: userIds,
+      },
+    },
+  });
+  const existing = new Set(existingRows.map((row) => String(row.get("user_id"))));
+
+  for (const userId of userIds) {
+    if (!existing.has(userId)) {
+      await ensureUserStatsRecord(userId);
+    }
+  }
 }

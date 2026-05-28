@@ -118,6 +118,7 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 2. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
 2. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
 3. Leaderboard + Check Balance: use `/leaderboard` in your server.
+4. Profile + Rank Progression: use `/profile` to view current rank, tagline, total given/received, daily give usage, and progress to the next rank.
 
 # About the project
 I commissioned this bot from a freelancer on Fiverr named [mdaniels6758](www.fiverr.com/mdaniels6758). I made some modifications and decided to open source the project in the hopes that it will benefit other Discord users, and that improvements can be brought to the project collectively.

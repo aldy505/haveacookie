@@ -8,6 +8,7 @@
     "start": "node dist/bot.js",
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/bot.ts",
+    "test": "tsx --test src/**/*.test.ts",
     "register-commands": "tsx src/registerCommands.ts",
     "lint": "oxlint src scripts",
     "format": "oxfmt --write src scripts package.json tsconfig.json",
