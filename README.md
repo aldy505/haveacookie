@@ -85,11 +85,21 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 2. Saving these changes will trigger the deployment of an updated Railway project.
 3. Your bot should now be live and working.
 
+### Registering slash commands
+1. Add your Discord app `clientId` in `config.json`.
+2. Optionally add `guildId` for faster, guild-scoped command updates while testing.
+3. Run `npm run register-commands` after changing slash commands.
+
+### Running the bot (TypeScript build)
+1. Install dependencies: `npm install`
+2. Build: `npm run build`
+3. Start: `npm start`
+
 ### Testing the Bot
 1. Give a reward: In any channel where the bot is present, `@` mention a fellow user followed by the emoji. For example, `"thanks for the help @candidexmedia :cookie:"`
 2. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
 2. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
-3. Leaderboard + Check Balance: `@` mention the bot in any channel where it's present.
+3. Leaderboard + Check Balance: use `/leaderboard` in your server.
 
 # About the project
 I commissioned this bot from a freelancer on Fiverr named [mdaniels6758](www.fiverr.com/mdaniels6758). I made some modifications and decided to open source the project in the hopes that it will benefit other Discord users, and that improvements can be brought to the project collectively.

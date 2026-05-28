@@ -1,5 +1,7 @@
 {
     "token": "<bot token>",
+    "clientId": "<discord application client id>",
+    "guildId": "<optional guild id for fast slash command updates>",
     
     "prefix": "!",
     "emoji": "🍪",
