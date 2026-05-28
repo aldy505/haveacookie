@@ -1,4 +1,4 @@
-import { DataTypes, Op, QueryTypes, Sequelize } from "sequelize";
+import { DataTypes, Op, QueryTypes, Sequelize, UniqueConstraintError } from "sequelize";
 import { config } from "./config";
 import {
   getRankProgress,
@@ -74,6 +74,42 @@ export const CUserStats = sequelize.define(
     indexes: [
       {
         fields: ["current_rank"],
+      },
+    ],
+  },
+);
+
+export const CReactionAward = sequelize.define(
+  "CReactionAward",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    message_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    giver_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    receiver_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    emoji: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    tableName: "c_reaction_awards",
+    indexes: [
+      {
+        unique: true,
+        fields: ["message_id", "giver_id", "emoji"],
       },
     ],
   },
@@ -316,6 +352,44 @@ export async function queryLeaderboards(
 export async function syncModels(): Promise<void> {
   await CUserCookie.sync();
   await CUserStats.sync();
+  await CReactionAward.sync();
+}
+
+export async function reserveReactionAward(
+  messageId: string,
+  giverId: string,
+  receiverId: string,
+  emoji: string,
+): Promise<boolean> {
+  try {
+    await CReactionAward.create({
+      message_id: messageId,
+      giver_id: giverId,
+      receiver_id: receiverId,
+      emoji,
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      return false;
+    }
+
+    throw error;
+  }
+}
+
+export async function releaseReactionAward(
+  messageId: string,
+  giverId: string,
+  emoji: string,
+): Promise<void> {
+  await CReactionAward.destroy({
+    where: {
+      message_id: messageId,
+      giver_id: giverId,
+      emoji,
+    },
+  });
 }
 
 export async function backfillUserStatsFromTransactions(): Promise<void> {

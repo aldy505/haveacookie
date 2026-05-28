@@ -97,7 +97,8 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 
 1. Add your Discord app `clientId` in `config.json`.
 2. Optionally add `guildId` for faster, guild-scoped command updates while testing.
-3. Run `npm run register-commands` after changing slash commands.
+3. Slash commands are now auto-registered during bot startup.
+4. `npm run register-commands` is still available as a manual fallback.
 
 ### Running the bot (TypeScript build)
 
@@ -129,10 +130,13 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 ### Testing the Bot
 
 1. Give a reward: In any channel where the bot is present, `@` mention a fellow user followed by the emoji. For example, `"thanks for the help @candidexmedia :cookie:"`
-2. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
-3. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
-4. Leaderboard + Check Balance: use `/leaderboard` in your server.
-5. Profile + Rank Progression: use `/profile` to view current rank, tagline, total given/received, daily give usage, and progress to the next rank.
+2. Give a reward via application command: use `/give user:@member`.
+3. Give a reward via reaction: react to someone else's message with the configured emoji.
+4. After a cookie is given, the giver and receiver get a private DM with a link to the source message and updated cookie stats.
+5. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
+6. Purchase a Prize: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` and the prize number (ie: "`!prizes 1`" for the first prize listed in the prize list).
+7. Leaderboard + Check Balance: use `/leaderboard` in your server.
+8. Profile + Rank Progression: use `/profile` to view current rank, tagline, total given/received, daily give usage, and progress to the next rank.
 
 # About the project
 

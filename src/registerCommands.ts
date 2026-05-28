@@ -1,7 +1,7 @@
 import { REST, Routes, SlashCommandBuilder } from "discord.js";
 import { config } from "./config";
 
-const commands = [
+export const commands = [
   new SlashCommandBuilder()
     .setName("leaderboard")
     .setDescription("Show the cookie leaderboard.")
@@ -13,9 +13,16 @@ const commands = [
       option.setName("user").setDescription("User to view").setRequired(false),
     )
     .toJSON(),
+  new SlashCommandBuilder()
+    .setName("give")
+    .setDescription("Give a cookie to another user.")
+    .addUserOption((option) =>
+      option.setName("user").setDescription("User to give a cookie to").setRequired(true),
+    )
+    .toJSON(),
 ];
 
-async function registerCommands(): Promise<void> {
+export async function registerApplicationCommands(): Promise<void> {
   const rest = new REST({ version: "10" }).setToken(config.token);
   const route = config.guildId
     ? Routes.applicationGuildCommands(config.clientId, config.guildId)
@@ -30,5 +37,3 @@ async function registerCommands(): Promise<void> {
 
   console.log("Registered global slash commands");
 }
-
-void registerCommands();
