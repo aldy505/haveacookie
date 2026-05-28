@@ -1,0 +1,29 @@
+services:
+  app:
+    image: ghcr.io/aldy505/haveacookie:edge
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://haveacookie:haveacookie@postgres:5432/haveacookie
+    volumes:
+      - ./config.json:/app/config.json:ro
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: haveacookie
+      POSTGRES_USER: haveacookie
+      POSTGRES_PASSWORD: haveacookie
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

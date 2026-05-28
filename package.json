@@ -2,15 +2,17 @@
   "name": "Have a Cookie Bot",
   "version": "1.0.0",
   "description": "The bot that builds stronger, happier communities through rewards and recongition.",
+  "license": "AGPLv3",
   "main": "dist/bot.js",
   "scripts": {
     "start": "node dist/bot.js",
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/bot.ts",
-    "register-commands": "tsx src/registerCommands.ts"
+    "register-commands": "tsx src/registerCommands.ts",
+    "lint": "oxlint src scripts",
+    "format": "oxfmt --write src scripts package.json tsconfig.json",
+    "format:check": "oxfmt --check src scripts package.json tsconfig.json"
   },
-  "authors": "Fiverr.com/mdaniels6758, github.com/candidexmedia",
-  "license": "AGPLv3",
   "dependencies": {
     "cron": "^4.4.0",
     "date-fns-tz": "^3.2.0",
@@ -23,10 +25,13 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "oxfmt": "^0.52.0",
+    "oxlint": "^1.67.0",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "authors": "Fiverr.com/mdaniels6758, github.com/candidexmedia"
 }

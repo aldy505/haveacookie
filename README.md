@@ -95,6 +95,24 @@ To use it, simply [set up the bot](https://github.com/havecookie/haveacookie#get
 2. Build: `npm run build`
 3. Start: `npm start`
 
+### Lint and format checks
+1. Check formatting: `npm run format:check`
+2. Run lint: `npm run lint`
+3. Fix formatting: `npm run format`
+
+### Docker image
+- Runtime base image: `gcr.io/distroless/nodejs24-debian13`
+- Published image: `ghcr.io/aldy505/haveacookie`
+- Tags:
+  - `sha-<shortsha>`: published when image workflow runs
+  - `edge`: published from `main`
+  - `latest`: published only for `release/published`
+
+### Docker Compose
+1. Ensure your local `config.json` uses `postgres` as the database host (for example: `postgres://haveacookie:haveacookie@postgres:5432/haveacookie`).
+2. Start services: `docker compose up -d`
+3. Stop services: `docker compose down`
+
 ### Testing the Bot
 1. Give a reward: In any channel where the bot is present, `@` mention a fellow user followed by the emoji. For example, `"thanks for the help @candidexmedia :cookie:"`
 2. List of Prizes: Direct message the bot using your prefix set in [`config.json`](https://github.com/havecookie/haveacookie/blob/main/data/config.json) followed by `prizes` (no space) (ie: "`!prizes`").
